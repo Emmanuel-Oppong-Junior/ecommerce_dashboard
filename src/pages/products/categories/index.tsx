@@ -5,7 +5,6 @@ import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import CustomAvatar from 'src/@core/components/mui/avatar'
-
 import TableHeader from 'src/component/TableHeader'
 import { CategoriesResponseType, CategoryType } from '../../../types/apps/categoryTypes'
 import AddCategoryDrawer from 'src/views/products/category/list/AddCategoryDrawer'
@@ -18,53 +17,12 @@ interface CellType {
   row: CategoryType
 }
 
-const columns: GridColDef[] = [
-  {
-    flex: 0.25,
-    minWidth: 280,
-    field: 'image',
-    headerName: 'Image',
-    renderCell: ({ row }: CellType) => {
-      return <CustomAvatar src={row.image} sx={{ mr: 2.5, width: 60, height: 60 }} />
-    }
-  },
-  {
-    flex: 0.25,
-    minWidth: 280,
-    field: 'name',
-    headerName: 'Category Name',
-    renderCell: ({ row }: CellType) => {
-      return <TableRowContent text={row.name} />
-    }
-  },
-  {
-    flex: 0.15,
-    field: 'description',
-    minWidth: 170,
-    headerName: 'Description',
-    renderCell: ({ row }: CellType) => {
-      return <TableRowContent text={row.description} />
-    }
-  },
-  {
-    flex: 0.1,
-    minWidth: 100,
-    sortable: false,
-    field: 'actions',
-    headerName: 'Actions',
-    renderCell: ({ row }: CellType) => <RowOptions id={row.id} type='category' />
-  }
-]
-
 const CategoryList = () => {
   const [value, setValue] = useState<string>('')
   const [addCategoryOpen, setAddCategoryOpen] = useState<boolean>(false)
+  const [selectedCategory, setSelectedCategory] = useState<CategoryType | undefined>(undefined)
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
   const { loading, error, data } = useQuery<CategoriesResponseType>(GET_CATEGORIES)
-
-  if (data) {
-    console.log(data)
-  }
 
   useEffect(() => {}, [value])
 
@@ -72,7 +30,54 @@ const CategoryList = () => {
     setValue(val)
   }, [])
 
-  const toggleAddCategoryDrawer = () => setAddCategoryOpen(!addCategoryOpen)
+  const toggleAddCategoryDrawer = useCallback((category?: CategoryType) => {
+    setSelectedCategory(category)
+    setAddCategoryOpen(!addCategoryOpen)
+  }, [addCategoryOpen])
+
+  const columns: GridColDef[] = [
+    {
+      flex: 0.25,
+      minWidth: 280,
+      field: 'image',
+      headerName: 'Image',
+      renderCell: ({ row }: CellType) => {
+        return <CustomAvatar src={row.image} sx={{ mr: 2.5, width: 60, height: 60 }} />
+      }
+    },
+    {
+      flex: 0.25,
+      minWidth: 280,
+      field: 'name',
+      headerName: 'Category Name',
+      renderCell: ({ row }: CellType) => {
+        return <TableRowContent text={row.name} />
+      }
+    },
+    {
+      flex: 0.15,
+      field: 'description',
+      minWidth: 170,
+      headerName: 'Description',
+      renderCell: ({ row }: CellType) => {
+        return <TableRowContent text={row.description} />
+      }
+    },
+    {
+      flex: 0.1,
+      minWidth: 100,
+      sortable: false,
+      field: 'actions',
+      headerName: 'Actions',
+      renderCell: ({ row }: CellType) => (
+        <RowOptions
+          id={row.id}
+          type='category'
+          toggle={() => toggleAddCategoryDrawer(row)}
+        />
+      )
+    }
+  ]
 
   return (
     <Grid container spacing={6.5}>
@@ -87,7 +92,7 @@ const CategoryList = () => {
             searchPlaceholder='Search Category'
             value={value}
             handleFilter={handleFilter}
-            toggle={toggleAddCategoryDrawer}
+            toggle={() => toggleAddCategoryDrawer()}
           />
           <DataGrid
             loading={loading}
@@ -102,7 +107,11 @@ const CategoryList = () => {
           />
         </Card>
       </Grid>
-      <AddCategoryDrawer open={addCategoryOpen} toggle={toggleAddCategoryDrawer} />
+      <AddCategoryDrawer
+        open={addCategoryOpen}
+        toggle={toggleAddCategoryDrawer}
+        category={selectedCategory}
+      />
     </Grid>
   )
 }

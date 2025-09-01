@@ -26,7 +26,7 @@ const formatFileSize = (size: number) => {
 }
 
 const renderFilePreview = (file: File) => {
-  if (file.type.startsWith('image')) {
+  if (file?.type?.startsWith('image')) {
     return <img width={38} height={38} alt={file.name} src={URL.createObjectURL(file)} />
   }
 

@@ -10,6 +10,13 @@ export const CREATE_CATEGORY = gql`
     }
   }
 `
+export const UPDATE_CATEGORY = gql`
+  mutation UpdateCategory($updateCategoryId: String!, $input: UpdateCategoryInput!) {
+    updateCategory(id: $updateCategoryId, input: $input) {
+      id
+    }
+  }
+`
 export const DELETE_CATEGORY = gql`
   mutation RemoveCategory($removeCategoryId: String!) {
     removeCategory(id: $removeCategoryId) {

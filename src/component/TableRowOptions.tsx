@@ -4,22 +4,20 @@ import Icon from '../@core/components/icon'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Link from 'next/link'
-import AddSubCategoryDrawer from '../views/products/sub-category/list/AddSubCategoryDrawer'
-import AddCategoryDrawer from '../views/products/category/list/AddCategoryDrawer'
 import { useMutation } from '@apollo/client/react'
 import { DELETE_CATEGORY } from '../graphql/mutations'
 import { GET_CATEGORIES } from '../graphql/queries'
 import toast from 'react-hot-toast'
 
 type RowOptionsProps = {
-  id: number | string
+  id: string
   type: 'brand' | 'category' | 'subCategory'
+  toggle?: () => void
 }
 
-const RowOptions = ({ id, type }: RowOptionsProps) => {
+const RowOptions = ({ id, type, toggle }: RowOptionsProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const rowOptionsOpen = Boolean(anchorEl)
-  const [addCategoryOpen, setAddCategoryOpen] = useState<boolean>(false)
 
   const [deleteCategory] = useMutation(DELETE_CATEGORY)
 
@@ -36,17 +34,15 @@ const RowOptions = ({ id, type }: RowOptionsProps) => {
         variables: { removeCategoryId: id },
         refetchQueries: [GET_CATEGORIES]
       })
-      toast.success("Successfully deleted category")
+      toast.success('Successfully deleted category')
     }
     handleRowOptionsClose()
   }
 
   const handleEdit = () => {
     handleRowOptionsClose()
-    setAddCategoryOpen(true)
+    toggle()
   }
-
-  const toggleAddCategoryDrawer = () => setAddCategoryOpen(!addCategoryOpen)
 
   return (
     <>
@@ -86,9 +82,11 @@ const RowOptions = ({ id, type }: RowOptionsProps) => {
           Delete
         </MenuItem>
       </Menu>
-      {type === 'category' && <AddSubCategoryDrawer open={addCategoryOpen} toggle={toggleAddCategoryDrawer} />}
-      {type === 'brand' && <AddCategoryDrawer open={addCategoryOpen} toggle={toggleAddCategoryDrawer} />}
-      {type === 'subCategory' && <AddSubCategoryDrawer open={addCategoryOpen} toggle={toggleAddCategoryDrawer} />}
+      {/*{type === 'category' && (*/}
+      {/*  <AddCategoryDrawer open={addCategoryOpen} toggle={toggleAddCategoryDrawer} categoryId={id} />*/}
+      {/*)}*/}
+      {/*{type === 'brand' && <AddCategoryDrawer open={addCategoryOpen} toggle={toggleAddCategoryDrawer} />}*/}
+      {/*{type === 'subCategory' && <AddSubCategoryDrawer open={addCategoryOpen} toggle={toggleAddCategoryDrawer} />}*/}
     </>
   )
 }

@@ -7,9 +7,9 @@ import { Controller, useForm } from 'react-hook-form'
 import ImageUploader from '../../../forms/file-uploader/ImageUploader'
 import SideDrawer from '../../../../component/SideDrawer'
 import { useMutation } from '@apollo/client/react'
-import { CREATE_CATEGORY } from '../../../../graphql/mutations'
+import { CREATE_CATEGORY, UPDATE_CATEGORY } from '../../../../graphql/mutations'
 import { GET_CATEGORIES } from '../../../../graphql/queries'
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { uploadSingleImage } from '../../../../utils/utils'
 import toast from 'react-hot-toast'
 
@@ -21,46 +21,96 @@ const categorySchema = yup.object().shape({
 
 type CategoryFormValues = yup.InferType<typeof categorySchema>
 
+interface Category {
+  id: string
+  name: string
+  description?: string
+  image: string
+}
+
 interface SidebarAddCategoryProps {
   open: boolean
   toggle: () => void
+  category?: Category
 }
 
-const SidebarAddCategory = ({ open, toggle }: SidebarAddCategoryProps) => {
+const SidebarAddCategory = ({ open, toggle, category }: SidebarAddCategoryProps) => {
   const [addCategory] = useMutation(CREATE_CATEGORY)
+  const [updateCategory] = useMutation(UPDATE_CATEGORY)
+  const isEditMode = !!category
+
   const {
     reset,
     control,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
+    setValue
   } = useForm<CategoryFormValues>({
     mode: 'onChange',
-    resolver: yupResolver(categorySchema)
+    resolver: yupResolver(categorySchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      image: []
+    }
   })
+
+  useEffect(() => {
+    if (isEditMode && category) {
+      setValue('name', category.name)
+      setValue('description', category.description || '')
+      setValue('image', [category.image]) // Assuming image is stored as URL string
+    } else {
+      reset()
+    }
+  }, [category, isEditMode, setValue, reset])
 
   const onSubmit = useCallback(
     async (values: CategoryFormValues) => {
       try {
-        const uploadResult = await uploadSingleImage(values.image[0] as File)
-        if (!uploadResult?.url) throw new Error('Image upload failed')
-        await addCategory({
-          variables: {
-            input: {
-              name: values.name,
-              description: values.description,
-              image: uploadResult.url
-            }
-          },
-          refetchQueries: [GET_CATEGORIES]
-        })
-        toast.success('Category added successfully!')
+        let imageUrl = isEditMode ? category?.image : ''
+
+        // Only upload new image if a new file is selected
+        if (values.image[0] instanceof File) {
+          const uploadResult = await uploadSingleImage(values.image[0] as File)
+          if (!uploadResult?.url) throw new Error('Image upload failed')
+          imageUrl = uploadResult.url
+        }
+
+        if (isEditMode && category) {
+          await updateCategory({
+            variables: {
+              updateCategoryId: category.id,
+              input: {
+                name: values.name,
+                description: values.description,
+                image: imageUrl
+              }
+            },
+            refetchQueries: [GET_CATEGORIES]
+          })
+          toast.success('Category updated successfully!')
+        } else {
+          await addCategory({
+            variables: {
+              input: {
+                name: values.name,
+                description: values.description,
+                image: imageUrl
+              }
+            },
+            refetchQueries: [GET_CATEGORIES]
+          })
+          toast.success('Category added successfully!')
+        }
+
         reset()
         toggle()
       } catch (error: any) {
-        toast.error(error?.message || 'Failed to add category. Please try again.')
+        toast.error(error?.message || `Failed to ${isEditMode ? 'update' : 'add'} category. Please try again.`)
       }
     },
-    [addCategory, reset, toggle]
+    [addCategory, updateCategory, reset, toggle, isEditMode, category]
   )
 
   const handleClose = useCallback(() => {
@@ -69,7 +119,7 @@ const SidebarAddCategory = ({ open, toggle }: SidebarAddCategoryProps) => {
   }, [reset, toggle])
 
   return (
-    <SideDrawer open={open} title='Add Category' handleClose={handleClose}>
+    <SideDrawer open={open} title={isEditMode ? 'Edit Category' : 'Add Category'} handleClose={handleClose}>
       <Box sx={{ p: theme => theme.spacing(0, 6, 6) }}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Controller
@@ -111,7 +161,7 @@ const SidebarAddCategory = ({ open, toggle }: SidebarAddCategoryProps) => {
           />
           <Box mt='2rem' sx={{ display: 'flex', alignItems: 'center' }}>
             <Button type='submit' variant='contained' sx={{ mr: 3 }}>
-              Submit
+              {isEditMode ? 'Update' : 'Submit'}
             </Button>
             <Button variant='tonal' color='secondary' onClick={handleClose}>
               Cancel
