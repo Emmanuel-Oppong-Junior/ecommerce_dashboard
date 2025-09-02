@@ -673,6 +673,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/lodash@^4.17.20":
+  version "4.17.20"
+  resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.17.20.tgz"
+  integrity sha512-H3MHACvFUEiujabxhaI/ImO6gUrd8oOurg7LQtS7mbwIXA/cUqWrvBsaeJ23aZEPk1TAYkurjfMbSELfoCXlGA==
+
 "@types/node-fetch@^2.6.2":
   version "2.6.3"
   resolved "https://registry.npmjs.org/@types/node-fetch/-/node-fetch-2.6.3.tgz"
