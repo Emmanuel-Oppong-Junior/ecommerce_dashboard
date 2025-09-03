@@ -1,48 +1,35 @@
-import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import CircularProgress from '@mui/material/CircularProgress'
 import CustomTextField from 'src/@core/components/mui/text-field'
-import * as yup from 'yup'
-import { yupResolver } from '@hookform/resolvers/yup'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller } from 'react-hook-form'
 import ImageUploader from '../../../forms/file-uploader/ImageUploader'
 import SideDrawer from '../../../../component/SideDrawer'
+import { useSubCategoryForm } from './useSubCategoryForm'
 import MenuItem from '@mui/material/MenuItem'
 
-interface SidebarAddSubCategoryType {
-  open: boolean
-  toggle: () => void
+interface SubCategory {
+  id: string
+  name: string
+  description?: string
+  categoryId: string
+  image: string
 }
 
-const schema = yup.object().shape({
-  name: yup.string().max(255).required(),
-  categoryId: yup.number().required().positive(),
-  description: yup.string().max(255).optional(),
-  image: yup.array().of(yup.mixed()).min(1, 'You need to provide a file').max(1).required('You need to provide a file')
-})
+interface SidebarAddSubCategoryProps {
+  open: boolean
+  toggle: () => void
+  subcategory?: SubCategory
+}
 
-type AddCategoryType = yup.InferType<typeof schema>
-
-const AddSubCategoryDrawer = ({ open, toggle }: SidebarAddSubCategoryType) => {
-  const {
-    reset,
-    control,
-    handleSubmit,
-    formState: { errors }
-  } = useForm<AddCategoryType>({
-    mode: 'onChange',
-    resolver: yupResolver(schema)
-  })
-  const onSubmit = (data: AddCategoryType) => {
-    console.log(data)
-  }
-
-  const handleClose = () => {
-    toggle()
-    reset()
-  }
-
+const SidebarAddSubCategory = ({ open, toggle, subcategory }: SidebarAddSubCategoryProps) => {
+  const { isEditMode, control, errors, handleSubmit, onSubmit, handleClose, isSubmitting, categories } =
+    useSubCategoryForm({
+      subcategory,
+      toggle
+    })
   return (
-    <SideDrawer open={open} title='Add Sub Category' handleClose={handleClose}>
+    <SideDrawer open={open} title={isEditMode ? 'Edit SubCategory' : 'Add SubCategory'} handleClose={handleClose}>
       <Box sx={{ p: theme => theme.spacing(0, 6, 6) }}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Controller
@@ -53,7 +40,7 @@ const AddSubCategoryDrawer = ({ open, toggle }: SidebarAddSubCategoryType) => {
               <CustomTextField
                 fullWidth
                 sx={{ mb: 4 }}
-                label='Category Name'
+                label='SubCategory Name'
                 placeholder='Phones, Laptops...'
                 error={Boolean(errors.name)}
                 {...field}
@@ -82,8 +69,9 @@ const AddSubCategoryDrawer = ({ open, toggle }: SidebarAddSubCategoryType) => {
                 aria-describedby='validation-categoryId'
                 {...(errors.categoryId && { helperText: 'This field is required' })}
               >
-                <MenuItem value='1'>Computers</MenuItem>
-                <MenuItem value='2'>Accessories</MenuItem>
+                {categories?.categories?.map(category => (
+                  <MenuItem value={category.id}>{category.name}</MenuItem>
+                ))}
               </CustomTextField>
             )}
           />
@@ -111,12 +99,11 @@ const AddSubCategoryDrawer = ({ open, toggle }: SidebarAddSubCategoryType) => {
             rules={{ required: true }}
             render={() => <ImageUploader name='image' maxFiles={1} control={control} />}
           />
-
           <Box mt='2rem' sx={{ display: 'flex', alignItems: 'center' }}>
-            <Button type='submit' variant='contained' sx={{ mr: 3 }}>
-              Submit
+            <Button type='submit' variant='contained' sx={{ mr: 3 }} disabled={isSubmitting}>
+              {isSubmitting ? <CircularProgress size={24} color='inherit' /> : isEditMode ? 'Update' : 'Submit'}
             </Button>
-            <Button variant='tonal' color='secondary' onClick={handleClose}>
+            <Button variant='tonal' color='secondary' onClick={handleClose} disabled={isSubmitting}>
               Cancel
             </Button>
           </Box>
@@ -126,4 +113,4 @@ const AddSubCategoryDrawer = ({ open, toggle }: SidebarAddSubCategoryType) => {
   )
 }
 
-export default AddSubCategoryDrawer
+export default SidebarAddSubCategory

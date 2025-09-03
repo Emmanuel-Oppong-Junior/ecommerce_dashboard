@@ -10,13 +10,11 @@ import Icon from 'src/@core/components/icon'
 
 interface TableHeaderProps {
   value: string
-  toggle?: () => void
   handleFilter: (val: string) => void
 }
 
 const TableHeader = (props: TableHeaderProps) => {
-  // ** Props
-  const { handleFilter, toggle, value } = props
+  const { handleFilter, value } = props
 
   return (
     <Box
@@ -38,14 +36,9 @@ const TableHeader = (props: TableHeaderProps) => {
         <CustomTextField
           value={value}
           sx={{ mr: 4 }}
-          placeholder='Search User'
+          placeholder='Search Product'
           onChange={e => handleFilter(e.target.value)}
         />
-
-        <Button onClick={toggle} variant='contained' sx={{ '& svg': { mr: 2 } }}>
-          <Icon fontSize='1.125rem' icon='tabler:plus' />
-          Add New User
-        </Button>
       </Box>
     </Box>
   )

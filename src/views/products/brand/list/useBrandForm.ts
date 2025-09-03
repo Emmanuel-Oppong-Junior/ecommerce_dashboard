@@ -4,27 +4,27 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation } from '@apollo/client/react'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
-import { CREATE_CATEGORY, UPDATE_CATEGORY } from '../../../../graphql/mutations'
-import { GET_CATEGORIES } from '../../../../graphql/queries'
+import { CREATE_BRAND, UPDATE_BRAND } from '../../../../graphql/mutations'
+import { GET_BRANDS } from '../../../../graphql/queries'
 import { uploadSingleImage } from '../../../../utils/utils'
 
-type CategoryFormValues = {
+type BrandFormValues = {
   name: string
   description?: string
-  image: (File | string)[]
+  logo: (File | string)[]
 }
 
-interface Category {
+interface Brand {
   id: string
   name: string
   description?: string
-  image: string
+  logo: string
 }
 
-const categorySchema = yup.object().shape({
-  name: yup.string().max(255).required('Category name is required'),
+const brandSchema = yup.object().shape({
+  name: yup.string().max(255).required('Brand name is required'),
   description: yup.string().max(255).optional(),
-  image: yup
+  logo: yup
     .array()
     .of(
       yup.mixed().test('is-file-or-url', 'Invalid image', value => {
@@ -43,10 +43,10 @@ const categorySchema = yup.object().shape({
     .required('You need to provide an image')
 })
 
-export const useCategoryForm = ({ category, toggle }: { category?: Category; toggle: () => void }) => {
-  const isEditMode = !!category
-  const [addCategory] = useMutation(CREATE_CATEGORY)
-  const [updateCategory] = useMutation(UPDATE_CATEGORY)
+export const useBrandForm = ({ brand, toggle }: { brand?: Brand; toggle: () => void }) => {
+  const isEditMode = !!brand
+  const [addBrand] = useMutation(CREATE_BRAND)
+  const [updateBrand] = useMutation(UPDATE_BRAND)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const {
@@ -55,34 +55,34 @@ export const useCategoryForm = ({ category, toggle }: { category?: Category; tog
     handleSubmit,
     formState: { errors },
     setValue
-  } = useForm<CategoryFormValues>({
+  } = useForm<BrandFormValues>({
     mode: 'onChange',
-    resolver: yupResolver(categorySchema),
+    resolver: yupResolver(brandSchema),
     defaultValues: {
       name: '',
       description: '',
-      image: []
+      logo: []
     }
   })
 
   useEffect(() => {
-    if (isEditMode && category) {
-      setValue('name', category.name)
-      setValue('description', category.description || '')
-      setValue('image', [category.image])
+    if (isEditMode && brand) {
+      setValue('name', brand.name)
+      setValue('description', brand.description || '')
+      setValue('logo', [brand.logo])
     } else {
       reset()
     }
-  }, [category, isEditMode, setValue, reset])
+  }, [brand, isEditMode, setValue, reset])
 
   const onSubmit = useCallback(
-    async (values: CategoryFormValues) => {
+    async (values: BrandFormValues) => {
       setIsSubmitting(true)
       try {
-        let imageUrl = isEditMode ? category?.image : ''
+        let imageUrl = isEditMode ? brand?.logo : ''
 
-        if (values.image[0] instanceof File) {
-          const uploadResult = await uploadSingleImage(values.image[0] as File)
+        if (values.logo[0] instanceof File) {
+          const uploadResult = await uploadSingleImage(values.logo[0] as File)
           if (!uploadResult?.url) throw new Error('Image upload failed')
           imageUrl = uploadResult.url
         }
@@ -90,32 +90,32 @@ export const useCategoryForm = ({ category, toggle }: { category?: Category; tog
         const input = {
           name: values.name,
           description: values.description,
-          image: imageUrl
+          logo: imageUrl
         }
 
-        if (isEditMode && category) {
-          await updateCategory({
-            variables: { updateCategoryId: category.id, input },
-            refetchQueries: [GET_CATEGORIES]
+        if (isEditMode && brand) {
+          await updateBrand({
+            variables: { updateBrandId: brand.id, input },
+            refetchQueries: [GET_BRANDS]
           })
-          toast.success('Category updated successfully!')
+          toast.success('Brand updated successfully!')
         } else {
-          await addCategory({
+          await addBrand({
             variables: { input },
-            refetchQueries: [GET_CATEGORIES]
+            refetchQueries: [GET_BRANDS]
           })
-          toast.success('Category added successfully!')
+          toast.success('Brand added successfully!')
         }
 
         reset()
         toggle()
       } catch (error: any) {
-        toast.error(error?.message || `Failed to ${isEditMode ? 'update' : 'add'} category. Please try again.`)
+        toast.error(error?.message || `Failed to ${isEditMode ? 'update' : 'add'} brand. Please try again.`)
       } finally {
         setIsSubmitting(false)
       }
     },
-    [addCategory, updateCategory, reset, toggle, isEditMode, category]
+    [addBrand, updateBrand, reset, toggle, isEditMode, brand]
   )
 
   const handleClose = useCallback(() => {

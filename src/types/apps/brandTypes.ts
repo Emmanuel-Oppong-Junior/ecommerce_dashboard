@@ -1,6 +1,11 @@
-export type BrandTypes = {
-  id: number
+
+
+export type BrandType = {
+  id: string
   name: string
   description: string
-  image: string
+  logo: string
+}
+export type BrandsResponseType = {
+  brands: BrandType[]
 }

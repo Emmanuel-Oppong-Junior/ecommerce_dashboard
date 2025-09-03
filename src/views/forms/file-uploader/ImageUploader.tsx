@@ -25,8 +25,12 @@ const formatFileSize = (size: number) => {
   return kb > 1000 ? `${(kb / 1024).toFixed(1)} mb` : `${kb.toFixed(1)} kb`
 }
 
-const renderFilePreview = (file: File) => {
-  if (file?.type?.startsWith('image')) {
+const renderFilePreview = (file: File | string) => {
+  if (typeof file === 'string') {
+    return <img width={38} height={38} alt='Uploaded image' src={file} />
+  }
+
+  if (file instanceof File && file.type.startsWith('image')) {
     return <img width={38} height={38} alt={file.name} src={URL.createObjectURL(file)} />
   }
 
@@ -117,10 +121,14 @@ const ImageUploader = ({
                         <div className='file-details'>
                           <div className='file-preview'>{renderFilePreview(file)}</div>
                           <div>
-                            <Typography className='file-name'>{file.name}</Typography>
-                            <Typography className='file-size' variant='body2'>
-                              {formatFileSize(file.size)}
-                            </Typography>
+                            {file instanceof File && file.type.startsWith('image') && (
+                              <>
+                                <Typography className='file-name'>{file.name}</Typography>
+                                <Typography className='file-size' variant='body2'>
+                                  {formatFileSize(file.size)}
+                                </Typography>
+                              </>
+                            )}
                           </div>
                         </div>
                         <IconButton onClick={() => handleRemoveFile(file)}>

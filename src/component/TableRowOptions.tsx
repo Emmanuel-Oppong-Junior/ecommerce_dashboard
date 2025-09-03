@@ -5,8 +5,8 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Link from 'next/link'
 import { useMutation } from '@apollo/client/react'
-import { DELETE_CATEGORY } from '../graphql/mutations'
-import { GET_CATEGORIES } from '../graphql/queries'
+import { DELETE_BRAND, DELETE_CATEGORY, DELETE_SUB_CATEGORY } from '../graphql/mutations'
+import { GET_BRANDS, GET_CATEGORIES, GET_SUB_CATEGORIES } from '../graphql/queries'
 import toast from 'react-hot-toast'
 
 type RowOptionsProps = {
@@ -20,6 +20,8 @@ const RowOptions = ({ id, type, toggle }: RowOptionsProps) => {
   const rowOptionsOpen = Boolean(anchorEl)
 
   const [deleteCategory] = useMutation(DELETE_CATEGORY)
+  const [deleteBrand] = useMutation(DELETE_BRAND)
+  const [deleteSubCategory] = useMutation(DELETE_SUB_CATEGORY)
 
   const handleRowOptionsClick = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
@@ -36,12 +38,26 @@ const RowOptions = ({ id, type, toggle }: RowOptionsProps) => {
       })
       toast.success('Successfully deleted category')
     }
+    if (type === 'brand') {
+      await deleteBrand({
+        variables: { deleteBrandId: id },
+        refetchQueries: [GET_BRANDS]
+      })
+      toast.success('Successfully deleted brand')
+    }
+    if (type === 'subCategory') {
+      await deleteSubCategory({
+        variables: { removeSubCategoryId: id },
+        refetchQueries: [GET_SUB_CATEGORIES]
+      })
+      toast.success('Successfully deleted sub categories')
+    }
     handleRowOptionsClose()
   }
 
   const handleEdit = () => {
     handleRowOptionsClose()
-    toggle()
+    toggle?.()
   }
 
   return (
@@ -82,11 +98,6 @@ const RowOptions = ({ id, type, toggle }: RowOptionsProps) => {
           Delete
         </MenuItem>
       </Menu>
-      {/*{type === 'category' && (*/}
-      {/*  <AddCategoryDrawer open={addCategoryOpen} toggle={toggleAddCategoryDrawer} categoryId={id} />*/}
-      {/*)}*/}
-      {/*{type === 'brand' && <AddCategoryDrawer open={addCategoryOpen} toggle={toggleAddCategoryDrawer} />}*/}
-      {/*{type === 'subCategory' && <AddSubCategoryDrawer open={addCategoryOpen} toggle={toggleAddCategoryDrawer} />}*/}
     </>
   )
 }
