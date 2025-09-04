@@ -7,8 +7,11 @@ import CustomTextField from '../../../@core/components/mui/text-field'
 import MenuItem from '@mui/material/MenuItem'
 import CustomAutocomplete from '../../../@core/components/mui/autocomplete'
 import { AddProductionSectionProps } from './types'
+import { useAddProductForm } from './useAddProductForm'
 
 const OrganizeSection = ({ control, errors }: AddProductionSectionProps) => {
+  const { categories, brands, subCategories } = useAddProductForm({})
+
   return (
     <Card style={{ marginTop: '2rem' }}>
       <CardHeader title='Organize' />
@@ -33,15 +36,43 @@ const OrganizeSection = ({ control, errors }: AddProductionSectionProps) => {
                   id='validation-basic-category'
                   error={Boolean(errors.category)}
                   aria-describedby='validation-basic-category'
-                  {...(errors.category && { helperText: 'This field is required' })}
+                  {...(errors.category && { helperText: errors.category.message })}
                 >
-                  <MenuItem value='Laptops'>Laptops</MenuItem>
-                  <MenuItem value='Phones'>Phones</MenuItem>
-                  <MenuItem value='Tablets'>Tablets</MenuItem>
-                  <MenuItem value='Accessories'>Accessories</MenuItem>
-                  <MenuItem value='Monitors'>Monitors</MenuItem>
-                  <MenuItem value='Printers'>Printers</MenuItem>
-                  <MenuItem value='Wearables'>Wearables</MenuItem>
+                  {categories.map(category => (
+                    <MenuItem key={category.id} value={category.id}>
+                      {category.name}
+                    </MenuItem>
+                  ))}
+                </CustomTextField>
+              )}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Controller
+              name='subcategory'
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { value = '', onChange } }) => (
+                <CustomTextField
+                  select
+                  fullWidth
+                  label='Sub Category'
+                  defaultValue='tablets'
+                  placeholder='Select Sub Category'
+                  SelectProps={{
+                    value: value,
+                    onChange: e => onChange(e)
+                  }}
+                  id='validation-basic-sub-category'
+                  error={Boolean(errors.subcategory)}
+                  aria-describedby='validation-basic-sub-category'
+                  {...(errors.subcategory && { helperText: errors.subcategory.message })}
+                >
+                  {subCategories.map(category => (
+                    <MenuItem key={category.id} value={category.id}>
+                      {category.name}
+                    </MenuItem>
+                  ))}
                 </CustomTextField>
               )}
             />
@@ -65,17 +96,13 @@ const OrganizeSection = ({ control, errors }: AddProductionSectionProps) => {
                   id='validation-brand'
                   error={Boolean(errors.brand)}
                   aria-describedby='validation-brand'
-                  {...(errors.brand && { helperText: 'This field is required' })}
+                  {...(errors.brand && { helperText: errors.brand.message })}
                 >
-                  <MenuItem value='Samsung'>Samsung</MenuItem>
-                  <MenuItem value='Apple'>Apple</MenuItem>
-                  <MenuItem value='Dell'>Dell</MenuItem>
-                  <MenuItem value='HP'>HP</MenuItem>
-                  <MenuItem value='Lenovo'>Lenovo</MenuItem>
-                  <MenuItem value='Asus'>Asus</MenuItem>
-                  <MenuItem value='Acer'>Acer</MenuItem>
-                  <MenuItem value='Microsoft'>Microsoft</MenuItem>
-                  <MenuItem value='Google'>Google</MenuItem>
+                  {brands.map(brand => (
+                    <MenuItem key={brand.id} value={brand.id}>
+                      {brand.name}
+                    </MenuItem>
+                  ))}
                 </CustomTextField>
               )}
             />
@@ -99,11 +126,10 @@ const OrganizeSection = ({ control, errors }: AddProductionSectionProps) => {
                   id='validation-status'
                   error={Boolean(errors.status)}
                   aria-describedby='validation-status'
-                  {...(errors.status && { helperText: 'This field is required' })}
+                  {...(errors.status && { helperText: errors.status.message })}
                 >
-                  <MenuItem value='Published'>Published</MenuItem>
-                  <MenuItem value='Scheduled'>Scheduled</MenuItem>
-                  <MenuItem value='Inactive'>Inactive</MenuItem>
+                  <MenuItem value='true'>Active</MenuItem>
+                  <MenuItem value='false'>Inactive</MenuItem>
                 </CustomTextField>
               )}
             />
@@ -130,7 +156,7 @@ const OrganizeSection = ({ control, errors }: AddProductionSectionProps) => {
                       label='Tags'
                       placeholder='Tags'
                       error={Boolean(errors.tags)}
-                      {...(errors.tags && { helperText: 'This field is required' })}
+                      {...(errors.tags && { helperText: errors.tags.message })}
                     />
                   )}
                 />

@@ -11,7 +11,7 @@ const ProductImageSection = (props: AddProductionSectionProps) => (
     <CardContent>
       <Grid container spacing={5}>
         <Grid item xs={12}>
-          <ImageUploader name='image' control={props.control} />
+          <ImageUploader name='images' control={props.control} />
         </Grid>
       </Grid>
     </CardContent>

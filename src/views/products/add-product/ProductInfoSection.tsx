@@ -50,7 +50,7 @@ const ProductInformation = ({ control, errors }: AddProductionSectionProps) => {
                   placeholder='123452'
                   error={Boolean(errors.sku)}
                   aria-describedby='validation-basic-sku'
-                  {...(errors.sku && { helperText: 'This field is required' })}
+                  {...(errors.sku && { helperText: errors.sku.message })}
                 />
               )}
             />
@@ -68,7 +68,7 @@ const ProductInformation = ({ control, errors }: AddProductionSectionProps) => {
                   placeholder='643302412345'
                   error={Boolean(errors.barcode)}
                   aria-describedby='validation-basic-barcode'
-                  {...(errors.barcode && { helperText: 'This field is required' })}
+                  {...(errors.barcode && { helperText: errors.barcode?.message })}
                 />
               )}
             />
@@ -98,7 +98,7 @@ const ProductInformation = ({ control, errors }: AddProductionSectionProps) => {
                         fontSize: theme => theme.typography.body2.fontSize
                       }}
                     >
-                      This field is required
+                      {errors.description?.message}
                     </FormHelperText>
                   )}
                 </>

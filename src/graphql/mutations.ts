@@ -72,3 +72,12 @@ export const DELETE_BRAND = gql`
     }
   }
 `
+
+// products
+export const CREATE_PRODUCT = gql`
+  mutation CreateProduct($createProductInput: CreateProductInput!) {
+    createProduct(createProductInput: $createProductInput) {
+      id
+    }
+  }
+`

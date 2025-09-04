@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
 import Divider from '@mui/material/Divider'
@@ -6,7 +6,6 @@ import MenuItem from '@mui/material/MenuItem'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
-import { SelectChangeEvent } from '@mui/material/Select'
 
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import CustomTextField from 'src/@core/components/mui/text-field'
@@ -35,6 +34,8 @@ const Products = () => {
     handleCategoryFilter,
     categoryFilter,
     brandFilter,
+    statusFilter,
+    handleStatusFilter,
     paginationModel,
     setPaginationModel,
     categories,
@@ -66,6 +67,14 @@ const Products = () => {
         field: 'name',
         headerName: 'Name',
         renderCell: ({ row }: CellType) => <TableRowContent text={row.node.name} />,
+        sortComparator: (v1, v2) => v1.localeCompare(v2)
+      },
+      {
+        flex: 0.25,
+        minWidth: 100,
+        field: 'quantity',
+        headerName: 'Quantity',
+        renderCell: ({ row }: CellType) => <TableRowContent text={row.node.quantity.toString()} />,
         sortComparator: (v1, v2) => v1.localeCompare(v2)
       },
       {
@@ -109,7 +118,6 @@ const Products = () => {
     ],
     []
   )
-  const handleStatusChange = useCallback((e: SelectChangeEvent<unknown>) => {}, [])
 
   if (error) {
     return <Typography color='error'>Error loading Products: {error.message}</Typography>
@@ -118,7 +126,6 @@ const Products = () => {
   if (loading) {
     return <TableLoadingSkeleton title='Products' />
   }
-  console.log(categories)
 
   return (
     <Grid container spacing={6.5}>
@@ -132,13 +139,13 @@ const Products = () => {
             <Grid container spacing={6}>
               <Grid item sm={4} xs={12}>
                 <CustomTextField
+                  label='Filter By Category'
                   select
                   fullWidth
-                  defaultValue='Select Categories'
                   SelectProps={{
                     value: categoryFilter,
                     displayEmpty: true,
-                    onChange: e => handleCategoryFilter(e.target.value || null)
+                    onChange: e => handleCategoryFilter((e.target.value as string) || null)
                   }}
                 >
                   {categories.map(item => (
@@ -150,13 +157,13 @@ const Products = () => {
               </Grid>
               <Grid item sm={4} xs={12}>
                 <CustomTextField
+                  label='Filter By Brand'
                   select
                   fullWidth
-                  defaultValue='Select Plan'
                   SelectProps={{
                     value: brandFilter,
                     displayEmpty: true,
-                    onChange: e => handleBrandFilter(e.target.value || null)
+                    onChange: e => handleBrandFilter((e.target.value as string) || null)
                   }}
                 >
                   {brands.map(item => (
@@ -170,17 +177,16 @@ const Products = () => {
                 <CustomTextField
                   select
                   fullWidth
-                  defaultValue='Select Status'
+                  label='Filter By Active Status'
+                  defaultValue='true'
                   SelectProps={{
-                    value: status,
+                    value: statusFilter,
                     displayEmpty: true,
-                    onChange: e => handleStatusChange(e)
+                    onChange: e => handleStatusFilter((e.target.value as boolean) || null)
                   }}
                 >
-                  <MenuItem value=''>Select Status</MenuItem>
-                  <MenuItem value='pending'>Pending</MenuItem>
-                  <MenuItem value='active'>Active</MenuItem>
-                  <MenuItem value='inactive'>Inactive</MenuItem>
+                  <MenuItem value='true'>Active</MenuItem>
+                  <MenuItem value='false'>Inactive</MenuItem>
                 </CustomTextField>
               </Grid>
             </Grid>

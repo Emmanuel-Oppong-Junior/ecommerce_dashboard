@@ -67,7 +67,7 @@ const SidebarAddSubCategory = ({ open, toggle, subcategory }: SidebarAddSubCateg
                 id='validation-categoryId'
                 error={Boolean(errors.categoryId)}
                 aria-describedby='validation-categoryId'
-                {...(errors.categoryId && { helperText: 'This field is required' })}
+                {...(errors.categoryId && { helperText: errors.categoryId.message })}
               >
                 {categories?.categories?.map(category => (
                   <MenuItem value={category.id}>{category.name}</MenuItem>

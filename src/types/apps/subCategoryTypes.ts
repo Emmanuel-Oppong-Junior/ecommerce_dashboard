@@ -9,5 +9,5 @@ export type SubCategoryType = {
   categoryId: string
 }
 export type SubCategoriesResponseType = {
-  subCategories: CategoryType[]
+  subCategories: SubCategoryType[]
 }
